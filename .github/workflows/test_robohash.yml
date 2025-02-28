@@ -39,13 +39,13 @@ jobs:
       run: ruby test_installed.rb
 
     - name: Upload generated images as artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4  # Updated from v3 to v4
       with:
         name: robot-images
         path: |
           installed_robot.png
           installed_robot2.png
-        retention-days: 7
+      retention-days: 7
 
     - name: Generate workflow summary
       run: |
