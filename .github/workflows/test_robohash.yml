@@ -38,6 +38,13 @@ jobs:
     - name: Test the installed gem with test_installed.rb
       run: bundle exec ruby test_installed.rb
 
+    - name: Install RMagick for image comparison
+      run: gem install rmagick
+
+    - name: Compare generated robots with reference images
+      run: ruby compare_robots.rb
+      continue-on-error: true
+
     - name: Upload generated images as artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -47,17 +54,10 @@ jobs:
           installed_robot2.png
         retention-days: 7
 
-    - name: Generate workflow summary
-      run: |
-        echo "# RoboHash Test Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## Robot from set1" >> $GITHUB_STEP_SUMMARY
-        echo "Robot image from set1 was successfully generated. You can download it from the artifacts." >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "## Robot from set2" >> $GITHUB_STEP_SUMMARY
-        echo "Robot image from set2 was successfully generated. You can download it from the artifacts." >> $GITHUB_STEP_SUMMARY
-
-    - name: Display test results
-      run: |
-        echo "=== Generated Robot Images ==="
-        ls -la installed_robot*.png
+    - name: Upload image differences as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: image-differences
+        path: difference_*.png
+        retention-days: 7
+      if: ${{ always() }}  # Upload even if comparison fails
