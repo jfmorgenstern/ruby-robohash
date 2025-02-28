@@ -1,0 +1,63 @@
+name: Test RoboHash Gem
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y imagemagick libmagickwand-dev
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+
+    - name: Install dependencies
+      run: bundle install
+
+    - name: Run tests
+      run: bundle exec rake spec
+
+    - name: Build and install the gem
+      run: bundle exec rake install
+
+    - name: Test the installed gem with test_installed.rb
+      run: ruby test_installed.rb
+
+    - name: Upload generated images as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: robot-images
+        path: |
+          installed_robot.png
+          installed_robot2.png
+        retention-days: 7
+
+    - name: Generate workflow summary
+      run: |
+        echo "# RoboHash Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Robot from set1" >> $GITHUB_STEP_SUMMARY
+        echo "Robot image from set1 was successfully generated. You can download it from the artifacts." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Robot from set2" >> $GITHUB_STEP_SUMMARY
+        echo "Robot image from set2 was successfully generated. You can download it from the artifacts." >> $GITHUB_STEP_SUMMARY
+
+    - name: Display test results
+      run: |
+        echo "=== Generated Robot Images ==="
+        ls -la installed_robot*.png
