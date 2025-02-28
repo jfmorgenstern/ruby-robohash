@@ -45,7 +45,7 @@ jobs:
         path: |
           installed_robot.png
           installed_robot2.png
-      retention-days: 7
+        retention-days: 7
 
     - name: Generate workflow summary
       run: |
